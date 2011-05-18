@@ -18,7 +18,30 @@
     <maven.compiler.target>1.5</maven.compiler.target>
   </properties>
 
+  <!-- This to add geo support -->
+  <repositories>
+    <repository>
+      <id>gwt-mobile-webkit</id>
+      <url>http://gwt-mobile-webkit.googlecode.com/svn/repo</url>
+    </repository>
+  </repositories>
+
   <dependencies>
+
+    <!-- BusIt lib -->
+    <dependency>
+      <groupId>uk.co.brotherlogic</groupId>
+      <artifactId>busitlib</artifactId>
+      <version>0.1</version>
+    </dependency>
+
+    <!--  Libraries for geolocation -->
+    <dependency>
+      <groupId>com.google.code.gwt-mobile-webkit</groupId>
+      <artifactId>gwt-html5-geolocation</artifactId>
+      <version>0.9.5</version>
+    </dependency>
+
     <dependency>
       <groupId>com.google.gwt</groupId>
       <artifactId>gwt-servlet</artifactId>
@@ -40,7 +63,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.8.1</version>
+      <version>4.8.2</version>
       <scope>test</scope>
     </dependency>
     <dependency>
