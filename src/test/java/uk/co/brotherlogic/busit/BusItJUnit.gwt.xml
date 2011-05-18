@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module>
+  <!-- Inherit our applications main module.                      -->
+  <inherits name='uk.co.brotherlogic.busit.BusIt'/>
+
+  <!-- Specify the path to any remote services.                   -->
+  <servlet path="/busit/greet" class="uk.co.brotherlogic.busit.server.GreetingServiceImpl" />
+
+</module>
