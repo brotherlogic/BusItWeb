@@ -12,11 +12,10 @@
   <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
   <inherits name="com.google.code.gwt.geolocation.Html5Geolocation" />
-  <inherits name="uk.co.brotherlogic.busit" />
 
   <!-- Other module inherits                                      -->
 
-  <!-- Specify the app entry point class.                         -->
+ <!-- Specify the app entry point class.                         -->
   <entry-point class='uk.co.brotherlogic.busit.client.BusIt'/>
 
   <!-- Specify the paths for translatable code                    -->

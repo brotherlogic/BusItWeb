@@ -9,3 +9,4 @@ bin
 probs.txt
 out*.txt
 nohup.out
+.gwt
