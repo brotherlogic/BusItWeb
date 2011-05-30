@@ -1,5 +1,7 @@
 package uk.co.brotherlogic.busit.client;
 
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.TreeMap;
@@ -8,6 +10,8 @@ import uk.co.brotherlogic.busit.BusStop;
 
 import com.google.code.gwt.geolocation.client.Geolocation;
 import com.google.code.gwt.geolocation.client.Position;
+import com.google.code.gwt.geolocation.client.PositionCallback;
+import com.google.code.gwt.geolocation.client.PositionError;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
@@ -25,11 +29,29 @@ public class BusIt implements EntryPoint
    @Override
    public void onModuleLoad()
    {
+	   
       // Do everything on the location callbac
       if (Geolocation.isSupported())
       {
          Label mainLabel = new Label("Hello");
          RootPanel.get("maintext").add(mainLabel);
+         
+         Geolocation geo = Geolocation.getGeolocation();
+         geo.getCurrentPosition(new PositionCallback() {
+			
+			@Override
+			public void onSuccess(Position position) {
+				Label newLabel = new Label(position.getCoords().getLatitude() + "," + position.getCoords().getLongitude());
+				RootPanel.get("maintext").add(newLabel);
+			}
+			
+			@Override
+			public void onFailure(PositionError error) {
+				Label newLabel = new Label("poo");
+				
+				RootPanel.get("maintext").add(newLabel);
+			}
+         });
       }
       else
       {
