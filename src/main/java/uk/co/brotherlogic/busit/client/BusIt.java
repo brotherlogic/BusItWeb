@@ -1,18 +1,16 @@
 package uk.co.brotherlogic.busit.client;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.TreeMap;
-
-import uk.co.brotherlogic.busit.BusStop;
-
+import com.google.code.gwt.geolocation.client.Coordinates;
 import com.google.code.gwt.geolocation.client.Geolocation;
 import com.google.code.gwt.geolocation.client.Position;
 import com.google.code.gwt.geolocation.client.PositionCallback;
 import com.google.code.gwt.geolocation.client.PositionError;
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.ui.Label;
 import com.google.gwt.user.client.ui.RootPanel;
 
@@ -21,7 +19,7 @@ import com.google.gwt.user.client.ui.RootPanel;
  */
 public class BusIt implements EntryPoint
 {
-   Map<Position, BusStop> stops = new TreeMap<Position, BusStop>();
+   String base_url = "http://edip:8085/busittomcat";
 
    /**
     * This is the entry point method.
@@ -33,62 +31,104 @@ public class BusIt implements EntryPoint
       // Do everything on the location callbac
       if (Geolocation.isSupported())
       {
-         Label mainLabel = new Label("Hello");
-         RootPanel.get("maintext").add(mainLabel);
-         
-         Geolocation geo = Geolocation.getGeolocation();
-         geo.getCurrentPosition(new PositionCallback() {
-			
-			@Override
-			public void onSuccess(Position position) {
-				Label newLabel = new Label(position.getCoords().getLatitude() + "," + position.getCoords().getLongitude());
-				RootPanel.get("maintext").add(newLabel);
-			}
-			
-			@Override
-			public void onFailure(PositionError error) {
-				Label newLabel = new Label("poo");
-				
-				RootPanel.get("maintext").add(newLabel);
-			}
+         Geolocation loc = Geolocation.getGeolocation();
+         System.err.println("Getting location");
+         loc.getCurrentPosition(new PositionCallback()
+         {
+            @Override
+            public void onSuccess(Position position)
+            {
+               System.err.println("Got location");
+               Coordinates coords = position.getCoords();
+               getBusStop(coords.getLatitude(), coords.getLongitude());
+            }
+
+            @Override
+            public void onFailure(PositionError error)
+            {
+               Label mainLabel = new Label("Cannot access location: " + error.getMessage());
+               RootPanel.get("maintext").add(mainLabel);
+            }
          });
       }
       else
       {
-         Label mainLabel = new Label("Goodbye");
+         Label mainLabel = new Label("Your browser does not support locations");
          RootPanel.get("maintext").add(mainLabel);
       }
+
    }
 
    private void runLocation(double lon, double lat)
    {
-      BusStop stop = getBusStop(lon, lat);
+      getBusStop(lon, lat);
    }
 
-   private BusStop getBusStop(double lon, double lat)
+   private void displayBusStop(String stop)
    {
-      // Load the bus stops if necessary
-
-      double bestDist = Double.MAX_VALUE;
-      BusStop retStop = null;
-
-      for (Entry<Position, BusStop> stop : stops.entrySet())
+      try
       {
-         double dist = computeDist(stop.getKey(), lon, lat);
-         if (dist < bestDist)
+         final String url = base_url + "/stop/" + stop;
+         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
+         System.out.println(base_url + "/stop/" + stop);
+         builder.sendRequest("", new RequestCallback()
          {
-            bestDist = dist;
-            retStop = stop.getValue();
-         }
-      }
+            @Override
+            public void onResponseReceived(Request request, Response response)
+            {
+               Label lab = new Label(url);
+               RootPanel.get("maintext").add(lab);
+            }
 
-      return retStop;
+            @Override
+            public void onError(Request request, Throwable exception)
+            {
+               System.err.println("Error!");
+            }
+         });
+      }
+      catch (RequestException e)
+      {
+         e.printStackTrace();
+      }
    }
 
-   private double computeDist(Position point, double lon, double lat)
+   private void getBusStop(double lon, double lat)
    {
-      return Math.sqrt((lon - point.getCoords().getLongitude())
-            * (lon - point.getCoords().getLongitude()) - (lat - point.getCoords().getLatitude())
-            * (lat - point.getCoords().getLatitude()));
+      System.err.println("Getting Bus Stops");
+      try
+      {
+         String url = base_url + "/stops/" + lon + "/" + lat;
+         RequestBuilder builder = new RequestBuilder(RequestBuilder.GET, url);
+         System.err.println("URL = " + url);
+         builder.sendRequest(null, new RequestCallback()
+         {
+            @Override
+            public void onResponseReceived(Request request, Response response)
+            {
+               System.err.println("Got: " + response.getText());
+               System.err.println("Also: " + response.getStatusText());
+               System.err.println("Thinking: " + request.toString());
+               System.err.println("And: " + response.getHeadersAsString());
+               System.err.println("Indeed: " + response.getStatusCode());
+               String stopID = response.getText();
+
+               Label lab2 = new Label("" + response.getStatusCode() + " => " + stopID);
+               RootPanel.get("maintext").add(lab2);
+
+               displayBusStop(stopID);
+            }
+
+            @Override
+            public void onError(Request request, Throwable exception)
+            {
+               System.err.println("Error!");
+            }
+         });
+      }
+      catch (RequestException e)
+      {
+         e.printStackTrace();
+      }
    }
 }
